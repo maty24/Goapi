@@ -1,0 +1,34 @@
+# Ignorar la configuración del entorno de desarrollo de GoLand/IntelliJ IDEA
+.idea/
+
+# Ignorar el binario compilado (si lo hay)
+main
+
+# Ignorar archivos de log
+*.log
+
+
+# Ignorar directorios específicos
+postgres/
+
+# Ignorar archivos de base de datos
+*.sql
+
+# Ignorar dependencias descargadas (si fuera necesario)
+vendor/
+
+# Ignorar archivos y directorios de caché y compilación
+*.out
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Ignorar cualquier archivo ejecutable generado
+*.exe
+
+# Ignorar la carpeta bin (si la tienes)
+bin/
+
+# Ignorar archivos de configuración de editor de texto
+*.swp
