@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/golang-jwt/jwt/v4"
 	"time"
 )
 
@@ -15,6 +16,18 @@ type Usuario struct {
 	UltimoInicioSesion time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP" json:"ultimo_inicio_sesion"`
 }
 
+// Claims define la estructura para los claims del JWT
+type Claims struct {
+	UserID uint   `json:"user_id"`
+	Email  string `json:"email"`
+	jwt.RegisteredClaims
+}
+
 func (Usuario) TableName() string {
 	return "usuarios"
+}
+
+// ValidateUsuario valida los datos de un usuario
+func ValidateUsuario(usuario *Usuario) error {
+	return validate.Struct(usuario)
 }

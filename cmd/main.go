@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"errors"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/maty24/Goapi.git/pkg/db"
 	"github.com/maty24/Goapi.git/pkg/router"
 	"log"
@@ -36,7 +38,7 @@ func main() {
 		log.Fatalf("Error al inicializar la base de datos: %v", err)
 	}
 
-	// Verificar conexión
+	// Verificar la conexión SQL obtenida de GORM
 	sqlDB, err := database.DB()
 	if err != nil {
 		log.Fatalf("Error al obtener la conexión SQL: %v", err)
@@ -46,10 +48,6 @@ func main() {
 			log.Fatalf("Error al cerrar la conexión SQL: %v", err)
 		}
 	}()
-
-	if err := sqlDB.PingContext(ctx); err != nil {
-		log.Fatalf("Error al hacer ping a la base de datos: %v", err)
-	}
 
 	// Crear instancia de Gin
 	r := gin.Default()
@@ -63,32 +61,36 @@ func main() {
 		port = "9001" // Puerto por defecto si no se especifica
 	}
 
-	// Iniciar el servidor en una goroutine para que podamos escuchar las señales del sistema
+	// Configurar el servidor
 	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: r,
 	}
 
+	// Iniciar el servidor en una goroutine
+	serverErrors := make(chan error, 1)
 	go func() {
 		log.Printf("Servidor iniciado en el puerto %s", port)
-		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("Error al iniciar el servidor: %v", err)
-		}
+		serverErrors <- server.ListenAndServe()
 	}()
 
-	// Esperar señales de cierre
-	<-stop
-	log.Println("Apagando servidor...")
+	select {
+	case err := <-serverErrors:
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("Error al iniciar el servidor: %v", err)
+		}
+	case sig := <-stop:
+		log.Printf("Señal recibida: %v. Apagando servidor...", sig)
 
-	// Crear un nuevo contexto con un tiempo de espera para el cierre del servidor
-	shutdownCtx, shutdownCancel := context.WithTimeout(ctx, 5*time.Second)
-	defer shutdownCancel()
+		// Crear un nuevo contexto con un tiempo de espera para el cierre del servidor
+		shutdownCtx, shutdownCancel := context.WithTimeout(ctx, 5*time.Second)
+		defer shutdownCancel()
 
-	// Intentar un cierre ordenado del servidor
-	if err := server.Shutdown(shutdownCtx); err != nil {
-		log.Fatalf("Error al apagar el servidor: %v", err)
+		// Intentar un cierre ordenado del servidor
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			log.Fatalf("Error al apagar el servidor: %v", err)
+		}
+
+		log.Println("Servidor apagado correctamente")
 	}
-
-	log.Println("Servidor apagado correctamente")
-
 }

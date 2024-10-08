@@ -8,3 +8,7 @@ type Categoria struct {
 func (Categoria) TableName() string {
 	return "categorias"
 }
+
+func ValidateCategoria(categoria *Categoria) error {
+	return validate.Struct(categoria)
+}

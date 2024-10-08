@@ -4,24 +4,23 @@ import (
 	"context"
 	"fmt"
 	"github.com/maty24/Goapi.git/pkg/config"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
 	"log"
 	"runtime"
 	"time"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 // InitDB inicializa la conexión a la base de datos.
 func InitDB(ctx context.Context) (*gorm.DB, error) {
-	config := config.LoadDBConfig()
-
-	// Validar la configuración
-	if err := config.Validate(); err != nil {
-		return nil, err
+	config, err := config.LoadDBConfig()
+	if err != nil {
+		return nil, fmt.Errorf("error cargando la configuración de la base de datos: %v", err)
 	}
 
-	// Construir el DSN
+	// Construir el DSN (Data Source Name)
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=America/Santiago",
 		config.DBHost, config.DBUser, config.DBPassword, config.DBName, config.DBPort,
@@ -30,7 +29,7 @@ func InitDB(ctx context.Context) (*gorm.DB, error) {
 	// Conectar a la base de datos
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
-			SingularTable: true,
+			SingularTable: true, // Para que GORM no pluralice los nombres de las tablas
 		},
 	})
 	if err != nil {
@@ -42,11 +41,12 @@ func InitDB(ctx context.Context) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// Verificar conexión inicial
+	// Verificar la conexión inicial
 	if err := verifyConnection(ctx, db); err != nil {
 		return nil, err
 	}
 
+	log.Println("Conexión a la base de datos exitosa")
 	return db, nil
 }
 
@@ -66,8 +66,7 @@ func configureConnectionPool(db *gorm.DB) error {
 	return nil
 }
 
-// verifyConnection verifica que la conexión a la base de datos sea exitosa..
-
+// verifyConnection verifica que la conexión a la base de datos sea exitosa.
 func verifyConnection(ctx context.Context, db *gorm.DB) error {
 	sqlDB, err := db.DB()
 	if err != nil {
@@ -78,6 +77,5 @@ func verifyConnection(ctx context.Context, db *gorm.DB) error {
 		return fmt.Errorf("error al hacer ping a la base de datos: %v", err)
 	}
 
-	log.Println("Conexión a la base de datos exitosa")
 	return nil
 }
