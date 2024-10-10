@@ -16,10 +16,10 @@ func NewLibroService(db *gorm.DB) *LibroService {
 }
 
 // GetAllLibros obtiene todos los libros de la base de datos
-func (s *LibroService) GetAllLibros() (*[]models.Libro, error) {
-	var libros []models.Libro
+func (s *LibroService) GetAllLibros() (*[]models.LibroResponse, error) {
+	var libros []models.LibroResponse
 
-	if err := s.db.Find(&libros).Error; err != nil {
+	if err := s.db.Preload("Categoria").Find(&libros).Error; err != nil {
 		return nil, err
 	}
 
@@ -27,8 +27,8 @@ func (s *LibroService) GetAllLibros() (*[]models.Libro, error) {
 }
 
 // GetLibroByID obtiene un libro por su ID, incluyendo la relación con Categoria
-func (s *LibroService) GetLibroByID(id uint) (*models.Libro, error) {
-	var libro models.Libro
+func (s *LibroService) GetLibroByID(id uint) (*models.LibroResponse, error) {
+	var libro models.LibroResponse
 
 	if err := s.db.Preload("Categoria").First(&libro, id).Error; err != nil {
 		return nil, err
@@ -44,7 +44,8 @@ func (s *LibroService) CreateLibro(libro *models.Libro) error {
 	}
 
 	if err := s.db.Create(libro).Error; err != nil {
-		return fmt.Errorf("error al crear libro: %w", err)
+		fmt.Printf("Error details: %v\n", err) // Log the error details
+		return fmt.Errorf("error al crear libro xd: %w", err)
 	}
 
 	return nil

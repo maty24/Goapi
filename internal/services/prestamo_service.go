@@ -28,6 +28,23 @@ func (s *PrestamoService) GetActivePrestamosByLectorID(lectorID uint) ([]models.
 	return prestamos, nil
 }
 
+// GetPendingPrestamos returns loans that are in a pending state, with a default limit of 20
+func (s *PrestamoService) GetPendingPrestamos(limit int) ([]models.Prestamo, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+
+	var prestamos []models.Prestamo
+	if err := s.DB.Preload("Libro").Preload("Libro.Categoria").Preload("Lector").
+		Where("estado = ?", "pendiente").
+		Limit(limit).
+		Find(&prestamos).Error; err != nil {
+		return nil, err
+	}
+
+	return prestamos, nil
+}
+
 // CreatePrestamo crea un nuevo préstamo si el libro está disponible
 func (s *PrestamoService) CreatePrestamo(prestamo *models.Prestamo) error {
 	var libro models.Libro

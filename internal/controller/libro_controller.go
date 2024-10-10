@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/maty24/Goapi.git/internal/models"
 	"github.com/maty24/Goapi.git/internal/services"
@@ -57,7 +58,9 @@ func (c *LibroController) CreateLibro(ctx *gin.Context) {
 	}
 
 	if err := c.libroService.CreateLibro(&libro); err != nil {
-		ctx.JSON(500, gin.H{"error": "Error al crear libro"})
+		// Log the error details
+		fmt.Printf("Error details: %v\n", err)
+		ctx.JSON(500, gin.H{"error": "Error al crear libro", "details": err.Error()})
 		return
 	}
 

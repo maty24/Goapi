@@ -4,6 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/maty24/Goapi.git/internal/models"
 	"github.com/maty24/Goapi.git/internal/services"
+	"log"
+	"net/http"
 	"strconv"
 )
 
@@ -57,6 +59,7 @@ func (c *UsuarioController) CreateUsuario(ctx *gin.Context) {
 	}
 
 	if err := c.userService.CreateUsuario(&usuario); err != nil {
+		log.Println("Error al crear usuario:", err) // Log the error to the console
 		ctx.JSON(500, gin.H{"error": "Error al crear usuario"})
 		return
 	}
@@ -64,7 +67,7 @@ func (c *UsuarioController) CreateUsuario(ctx *gin.Context) {
 	ctx.JSON(201, usuario)
 }
 
-// LoginUsuario logs in a user and returns a JWT token
+// LoginUsuario logs in a user and returns the token, name, and ID
 func (c *UsuarioController) LoginUsuario(ctx *gin.Context) {
 	var loginData struct {
 		Email    string `json:"email" binding:"required,email"`
@@ -72,15 +75,19 @@ func (c *UsuarioController) LoginUsuario(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&loginData); err != nil {
-		ctx.JSON(422, gin.H{"error": "Datos inválidos", "details": err.Error()})
+		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Datos inválidos", "details": err.Error()})
 		return
 	}
 
-	token, err := c.userService.Login(loginData.Email, loginData.Password)
+	token, user, err := c.userService.Login(loginData.Email, loginData.Password)
 	if err != nil {
-		ctx.JSON(401, gin.H{"error": "Usuario o contraseña incorrectos"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario o contraseña incorrectos"})
 		return
 	}
 
-	ctx.JSON(200, gin.H{"token": token})
+	ctx.JSON(http.StatusOK, gin.H{
+		"token":  token,
+		"nombre": user.Nombre,
+		"id":     user.ID,
+	})
 }

@@ -62,27 +62,27 @@ func (s *UsuarioService) CreateUsuario(usuario *models.Usuario) error {
 	return nil
 }
 
-// Login Función de login que devuelve un token JWT
-func (s *UsuarioService) Login(email, password string) (string, error) {
+// Login logs in a user and returns a JWT token and the user object
+func (s *UsuarioService) Login(email, password string) (string, *models.Usuario, error) {
 	var usuario models.Usuario
 
 	// Buscar el usuario por email
 	if err := s.db.Where("email = ?", email).First(&usuario).Error; err != nil {
-		return "", errors.New("usuario no encontrado")
+		return "", nil, errors.New("usuario no encontrado")
 	}
 
 	// Verificar si la contraseña es correcta
 	if err := bcrypt.CompareHashAndPassword([]byte(usuario.PasswordHash), []byte(password)); err != nil {
-		return "", errors.New("contraseña incorrecta")
+		return "", nil, errors.New("contraseña incorrecta")
 	}
 
 	// Crear el token JWT
 	token, err := generateJWT(usuario.ID, usuario.Email)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return token, nil
+	return token, &usuario, nil
 }
 
 // Función para generar un token JWT
