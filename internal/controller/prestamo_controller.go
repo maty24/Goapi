@@ -53,6 +53,27 @@ func (c *PrestamoController) CreatePrestamo(ctx *gin.Context) {
 	ctx.JSON(201, prestamo)
 }
 
+// getPrestamoById
+func (c *PrestamoController) GetPrestamoByID(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "id inválido"})
+		return
+	}
+
+	prestamo, err := c.prestamoService.GetPrestamoByID(uint(id))
+	if err != nil {
+		if err.Error() == "préstamo con ID no encontrado" {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Préstamo no encontrado"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, prestamo)
+}
+
 // ReturnPrestamo handles the request to return a loan
 func (c *PrestamoController) ReturnPrestamo(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))

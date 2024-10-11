@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/go-playground/validator/v10"
+	"github.com/maty24/Goapi.git/pkg/globals"
 )
 
 type Autor struct {
@@ -9,14 +9,21 @@ type Autor struct {
 	Nombre string `gorm:"type:varchar(100);not null" json:"nombre" validate:"required,min=3,max=100"`
 }
 
+type AutorResponse struct {
+	ID     uint   `json:"id"`
+	Nombre string `json:"nombre"`
+}
+
 // TableName Custom function to return table name
 func (Autor) TableName() string {
 	return "autores"
 }
 
-var validate = validator.New()
+func (AutorResponse) TableName() string {
+	return "autores"
+}
 
 // ValidateAutor Function to validate Autor
 func ValidateAutor(autor *Autor) error {
-	return validate.Struct(autor)
+	return globals.Validate.Struct(autor)
 }

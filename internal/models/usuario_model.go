@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/maty24/Goapi.git/pkg/globals"
 	"time"
 )
 
@@ -29,5 +30,16 @@ func (Usuario) TableName() string {
 
 // ValidateUsuario valida los datos de un usuario
 func ValidateUsuario(usuario *Usuario) error {
-	return validate.Struct(usuario)
+	return globals.Validate.Struct(usuario)
+}
+
+type UsuarioResponse struct {
+	ID          uint   `json:"id"`
+	Nombre      string `json:"nombre"`
+	Email       string `json:"email"`
+	TipoUsuario string `json:"tipo_usuario"`
+}
+
+func (UsuarioResponse) TableName() string {
+	return "usuarios"
 }

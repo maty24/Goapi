@@ -27,37 +27,25 @@ func GetEnvStrict(key string) (string, error) {
 
 // LoadDBConfig carga la configuración de la base de datos desde las variables de entorno.
 func LoadDBConfig() (Config, error) {
-	dbHost, err := GetEnvStrict("DB_HOST")
-	if err != nil {
-		return Config{}, err
+	requiredEnvVars := []string{"DB_HOST", "DB_USER", "DB_PASSWORD", "DB_NAME", "DB_PORT"}
+	var missingVars []string
+
+	for _, envVar := range requiredEnvVars {
+		if _, exists := os.LookupEnv(envVar); !exists {
+			missingVars = append(missingVars, envVar)
+		}
 	}
 
-	dbUser, err := GetEnvStrict("DB_USER")
-	if err != nil {
-		return Config{}, err
-	}
-
-	dbPassword, err := GetEnvStrict("DB_PASSWORD")
-	if err != nil {
-		return Config{}, err
-	}
-
-	dbName, err := GetEnvStrict("DB_NAME")
-	if err != nil {
-		return Config{}, err
-	}
-
-	dbPort, err := GetEnvStrict("DB_PORT")
-	if err != nil {
-		return Config{}, err
+	if len(missingVars) > 0 {
+		return Config{}, fmt.Errorf("las siguientes variables de entorno son obligatorias: %v", missingVars)
 	}
 
 	return Config{
-		DBHost:     dbHost,
-		DBUser:     dbUser,
-		DBPassword: dbPassword,
-		DBName:     dbName,
-		DBPort:     dbPort,
+		DBHost:     os.Getenv("DB_HOST"),
+		DBUser:     os.Getenv("DB_USER"),
+		DBPassword: os.Getenv("DB_PASSWORD"),
+		DBName:     os.Getenv("DB_NAME"),
+		DBPort:     os.Getenv("DB_PORT"),
 	}, nil
 }
 

@@ -15,8 +15,8 @@ func NewCategoriaService(db *gorm.DB) *CategoriaService {
 	return &CategoriaService{db: db}
 }
 
-func (s *CategoriaService) GetAllCategorias() (*[]models.Categoria, error) {
-	var categorias []models.Categoria
+func (s *CategoriaService) GetAllCategorias() (*[]models.CategoriaResponse, error) {
+	var categorias []models.CategoriaResponse
 
 	if err := s.db.Find(&categorias).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener categorias: %w", err)
@@ -25,8 +25,8 @@ func (s *CategoriaService) GetAllCategorias() (*[]models.Categoria, error) {
 	return &categorias, nil
 }
 
-func (s *CategoriaService) GetCategoriaByID(id uint) (*models.Categoria, error) {
-	var categoria models.Categoria
+func (s *CategoriaService) GetCategoriaByID(id uint) (*models.CategoriaResponse, error) {
+	var categoria models.CategoriaResponse
 
 	if err := s.db.First(&categoria, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

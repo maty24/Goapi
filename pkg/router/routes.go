@@ -65,7 +65,8 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) {
 
 		prestamo := api.Group("/prestamo")
 		{
-			prestamo.GET("/:id", prestamoController.GetActivePrestamosByLectorID)
+			prestamo.GET("/lector/:id", prestamoController.GetActivePrestamosByLectorID)
+			prestamo.GET("/:id", prestamoController.GetPrestamoByID)
 			prestamo.POST("/", prestamoController.CreatePrestamo)
 			prestamo.PATCH("/:id", prestamoController.ReturnPrestamo)
 		}

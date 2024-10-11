@@ -16,8 +16,8 @@ func NewAutorService(db *gorm.DB) *AutorService {
 }
 
 // GetAllAutores obtiene todos los autores
-func (s *AutorService) GetAllAutores() ([]models.Autor, error) {
-	var autores []models.Autor
+func (s *AutorService) GetAllAutores() ([]models.AutorResponse, error) {
+	var autores []models.AutorResponse
 
 	if err := s.DB.Find(&autores).Error; err != nil {
 		// Aquí podrías agregar un log si lo consideras necesario
@@ -28,8 +28,8 @@ func (s *AutorService) GetAllAutores() ([]models.Autor, error) {
 }
 
 // GetAutorByID obtiene un autor por su ID
-func (s *AutorService) GetAutorByID(id uint) (*models.Autor, error) {
-	var autor models.Autor
+func (s *AutorService) GetAutorByID(id uint) (*models.AutorResponse, error) {
+	var autor models.AutorResponse
 
 	if err := s.DB.First(&autor, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

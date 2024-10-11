@@ -16,10 +16,10 @@ func NewPrestamoService(db *gorm.DB) *PrestamoService {
 }
 
 // GetActivePrestamosByLectorID returns active loans filtered by lectorID
-func (s *PrestamoService) GetActivePrestamosByLectorID(lectorID uint) ([]models.Prestamo, error) {
-	var prestamos []models.Prestamo
+func (s *PrestamoService) GetActivePrestamosByLectorID(lectorID uint) ([]models.PrestamoResponse, error) {
+	var prestamos []models.PrestamoResponse
 
-	if err := s.DB.Preload("Libro").Preload("Libro.Categoria").Preload("Lector").
+	if err := s.DB.Preload("Libro").Preload("Libro.Categoria").
 		Where("lector_id = ? AND estado = ?", lectorID, "pendiente").
 		Find(&prestamos).Error; err != nil {
 		return nil, err
@@ -43,6 +43,17 @@ func (s *PrestamoService) GetPendingPrestamos(limit int) ([]models.Prestamo, err
 	}
 
 	return prestamos, nil
+}
+
+// GetPrestamoByID returns a loan by its ID
+func (s *PrestamoService) GetPrestamoByID(id uint) (*models.Prestamo, error) {
+	var prestamo models.Prestamo
+
+	if err := s.DB.Preload("Libro").Preload("Lector").First(&prestamo, id).Error; err != nil {
+		return nil, err
+	}
+
+	return &prestamo, nil
 }
 
 // CreatePrestamo crea un nuevo préstamo si el libro está disponible

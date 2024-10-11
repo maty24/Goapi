@@ -62,7 +62,6 @@ func (s *UsuarioService) CreateUsuario(usuario *models.Usuario) error {
 	return nil
 }
 
-// Login logs in a user and returns a JWT token and the user object
 func (s *UsuarioService) Login(email, password string) (string, *models.Usuario, error) {
 	var usuario models.Usuario
 
@@ -76,6 +75,12 @@ func (s *UsuarioService) Login(email, password string) (string, *models.Usuario,
 		return "", nil, errors.New("contraseña incorrecta")
 	}
 
+	// Actualizar el campo UltimoInicioSesion
+	usuario.UltimoInicioSesion = time.Now()
+	if err := s.db.Save(&usuario).Error; err != nil {
+		return "", nil, errors.New("error al actualizar el último inicio de sesión")
+	}
+
 	// Crear el token JWT
 	token, err := generateJWT(usuario.ID, usuario.Email)
 	if err != nil {
@@ -85,7 +90,6 @@ func (s *UsuarioService) Login(email, password string) (string, *models.Usuario,
 	return token, &usuario, nil
 }
 
-// Función para generar un token JWT
 func generateJWT(userID uint, email string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour) // El token expira en 24 horas
 
@@ -109,7 +113,6 @@ func generateJWT(userID uint, email string) (string, error) {
 	return tokenString, nil
 }
 
-// Función para hashear la contraseña
 func hashPassword(password string) (string, error) {
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
